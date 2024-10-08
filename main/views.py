@@ -15,10 +15,21 @@ from main.forms import MoodEntryForm
 from main.models import MoodEntry
 
 @login_required(login_url='/login')
+@csrf_exempt
+@require_POST
+def add_mood_entry_ajax(request):
+    mood = strip_tags(request.POST.get("mood")) # strip HTML tags!
+    feelings = strip_tags(request.POST.get("feelings")) # strip HTML tags!
+    mood_intensity = request.POST.get("mood_intensity")
+    user = request.user
+
+    new_mood = MoodEntry(
+        mood=mood, feelings=feelings, mood_intensity=mood_intensity, user=user
+    )
+    new_mood.save()
+    return HttpResponse(b"CREATED",status=201)
 
 def show_main(request):
-
-
     context = {
         "npm" : "2306245030",
         "name" : request.user.username,
@@ -99,24 +110,11 @@ def edit_mood(request, id):
     if form.is_valid() and request.method == "POST":
         form.save()
         return HttpResponseRedirect(reverse('main:show_main'))
+    
     context = {'form':form}
     return render(request, "edit_mood.html", context)
 
 def delete_mood(request, id):
     mood = MoodEntry.objects.get(pk = id)
-    mood.delete
+    mood.delete()
     return HttpResponseRedirect(reverse('main:show_main'))
-
-@csrf_exempt
-@require_POST
-def add_mood_entry_ajax(request):
-    mood = strip_tags(request.POST.get("mood")) # strip HTML tags!
-    feelings = strip_tags(request.POST.get("feelings")) # strip HTML tags!
-    mood_intensity = require_POST.get("mood_intensity")
-    user = request.user
-
-    new_mood = MoodEntry(
-        mood=mood, feelings=feelings, mood_intensity=mood_intensity, user=user
-    )
-    new_mood.save()
-    return HttpResponse(b"CREATED",status=201)
