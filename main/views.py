@@ -30,11 +30,12 @@ def add_mood_entry_ajax(request):
     return HttpResponse(b"CREATED",status=201)
 
 def show_main(request):
+    last_login = request.COOKIES.get('last_login', 'Never')
     context = {
         "npm" : "2306245030",
         "name" : request.user.username,
         "class" : "PBP A",
-        'last_login': request.COOKIES['last_login'],
+        'last_login': last_login,
 
     }
     return render(request,"main.html",context)
